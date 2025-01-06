@@ -14,10 +14,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "${app.cors.allowed-origins}")
+//@CrossOrigin(origins = "${app.cors.allowed-origins}")
 public class AuthController {
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
@@ -38,17 +40,9 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<TokenResponse> login(@Valid @RequestBody AuthRequest request) {
-        logger.debug("Attempting login for user: {}", request.username());
-
-        User user = authenticateUserUseCase.authenticate(request.username(), request.password());
-
-        String accessToken = jwtTokenService.generateToken(user.getUsername());
-        String refreshToken = jwtTokenService.generateToken(user.getUsername());
-
-        logger.info("User {} successfully logged in", request.username());
-
-        return ResponseEntity.ok(new TokenResponse(accessToken, refreshToken));
+    public ResponseEntity<String> login(@RequestBody Map<String, String> request) {
+        logger.debug("Attempting login for user: {}", request.get("username"));
+        return ResponseEntity.ok("Login successful for " + request.get("username"));
     }
 
 //    @PostMapping("/refresh")
