@@ -1,4 +1,4 @@
-package application.usecases.dtos;
+package application.dtos;
 
 import jakarta.validation.constraints.NotBlank;
 
