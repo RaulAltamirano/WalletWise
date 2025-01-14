@@ -1,12 +1,14 @@
-package infrastructure.api.controller;
+package com.free.WalletWise.infrastructure.api.controller;
 
-import application.usecases.AuthenticateUserUseCase;
-import application.usecases.RefreshTokenUseCase;
-import application.usecases.RegisterUserUseCase;
-import application.dtos.AuthRequest;
-import application.dtos.TokenResponse;
-import domain.model.User;
-import infrastructure.security.JwtTokenService;
+import com.free.WalletWise.application.dtos.UserDTO;
+import com.free.WalletWise.application.usecases.AuthenticateUserUseCase;
+import com.free.WalletWise.application.usecases.RefreshTokenUseCase;
+import com.free.WalletWise.application.usecases.RegisterUserUseCase;
+import com.free.WalletWise.application.dtos.AuthRequest;
+import com.free.WalletWise.domain.exceptions.InvalidPasswordException;
+import com.free.WalletWise.domain.model.User;
+import com.free.WalletWise.infrastructure.security.JwtTokenService;
+import com.free.WalletWise.interfaces.ApiResponse;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +20,7 @@ import java.util.Map;
 
 
 @RestController
-@RequestMapping("/api/auth")
-//@CrossOrigin(origins = "${app.cors.allowed-origins}")
+@RequestMapping("/api/public/auth")
 public class AuthController {
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
@@ -57,13 +58,27 @@ public class AuthController {
 //    }
 
     @PostMapping("/register")
-    public ResponseEntity<Void> register(@Valid @RequestBody AuthRequest request) {
-        logger.debug("Attempting to register user: {}", request.username());
-        User createdUser = registerUserUseCase.register(request.username(), request.password());
+    public ResponseEntity<ApiResponse<UserDTO>> register(@Valid @RequestBody AuthRequest request) {
+        try {
+            User user = registerUserUseCase.register(request.username(), request.password());
+            UserDTO userDTO = UserDTO.from(user);
 
-        logger.info("User {} successfully registered", createdUser);
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(ApiResponse.success(userDTO, "User registered successfully"));
 
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        } catch (InvalidPasswordException e) {
+            logger.warn("Invalid password attempt: {}", e.getMessage());
+            return ResponseEntity
+                    .badRequest()
+                    .body(ApiResponse.error(e.getMessage()));
+
+        } catch (Exception e) {
+            logger.error("Registration error", e);
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("An unexpected error occurred"));
+        }
     }
 
     @PostMapping("/logout")
