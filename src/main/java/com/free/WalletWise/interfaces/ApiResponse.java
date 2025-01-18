@@ -1,8 +1,10 @@
 package com.free.WalletWise.interfaces;
-
+import lombok.Getter;
 import java.time.LocalDateTime;
 
+@Getter
 public class ApiResponse<T> {
+    // Getters
     private final boolean success;
     private final String message;
     private final T data;
@@ -13,6 +15,10 @@ public class ApiResponse<T> {
         this.message = message;
         this.data = data;
         this.timestamp = LocalDateTime.now();
+    }
+
+    public static <T> ApiResponse<T> success(T data) {
+        return new ApiResponse<>(true, "Operation successful", data);
     }
 
     public static <T> ApiResponse<T> success(T data, String message) {
