@@ -1,4 +1,4 @@
-package application.dtos;
+package com.free.WalletWise.application.dtos;
 
 import jakarta.validation.constraints.NotBlank;
 
